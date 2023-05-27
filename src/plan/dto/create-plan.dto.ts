@@ -1,40 +1,43 @@
 import { PlanEnum } from '../plans.constant';
 import {
+  IsBoolean,
   IsDate,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsObject,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
 class PlanLimitDto {
-  @Number()
+  @IsNumber()
   submissions = 0;
 
-  @Number()
+  @IsNumber()
   forms = 0;
 
-  @Boolean()
+  @IsBoolean()
   api_and_webhook_access = false;
 
-  @Boolean()
+  @IsBoolean()
   cross_domain_security = false;
 
-  @Boolean()
+  @IsBoolean()
   custom_redirect = false;
 
-  @Boolean()
+  @IsBoolean()
   file_attachments = false;
 
-  @Boolean()
+  @IsBoolean()
   app_integrations = false;
 }
 
 export class CreatePlanDto {
   @IsString()
   @IsEnum(PlanEnum)
-  @IsNotEmpty()
-  name: PlanEnum;
+  @IsOptional()
+  name: PlanEnum = PlanEnum.FREE;
 
   @IsObject()
   limits: PlanLimitDto;

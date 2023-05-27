@@ -1,6 +1,7 @@
-import { Prop, raw, Schema } from '@nestjs/mongoose';
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SignupStrategyEnum } from './constants';
 import { PlanEnum } from '../plan/plans.constant';
+import { IUserPlan, IUserStats } from './user';
 
 @Schema({ autoIndex: true, timestamps: true })
 export class User {
@@ -11,16 +12,19 @@ export class User {
   signup_strategy: SignupStrategyEnum;
 
   @Prop({ required: true })
-  password: string;
+  email_verified: boolean;
 
   @Prop({ required: true, unique: true })
   email: string;
 
   @Prop({ required: true })
-  hashedPassword: string;
+  password: string;
 
-  @Prop({ required: true })
-  salt: string;
+  // @Prop({ required: true })
+  // hashedPassword: string;
+  //
+  // @Prop({ required: true })
+  // salt: string;
 
   @Prop(
     raw({
@@ -34,7 +38,7 @@ export class User {
       },
     }),
   )
-  stats: Record<string, any>;
+  stats: IUserStats;
 
   @Prop(
     raw({
@@ -54,5 +58,9 @@ export class User {
       },
     }),
   )
-  plan: Record<string, any>;
+  plan: IUserPlan;
 }
+
+console.log('user', User);
+
+export const UserSchema = SchemaFactory.createForClass(User);
