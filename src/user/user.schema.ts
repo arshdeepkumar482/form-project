@@ -1,8 +1,13 @@
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SignupStrategyEnum } from './constants';
 import { PlanEnum } from '../plan/plans.constant';
-import { IUserPlan, IUserStats } from './user';
+import { CreatePlanDto } from '../plan/dto/create-plan.dto';
+export class IUserPlan extends CreatePlanDto {}
 
+export interface IUserStats {
+  forms: { total: number; active: number; inactive: number };
+  submissions: number;
+}
 @Schema({ autoIndex: true, timestamps: true })
 export class User {
   @Prop({ required: true })
@@ -60,7 +65,5 @@ export class User {
   )
   plan: IUserPlan;
 }
-
-console.log('user', User);
 
 export const UserSchema = SchemaFactory.createForClass(User);

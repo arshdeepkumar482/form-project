@@ -1,7 +1,5 @@
-import { CreateFormDto } from '../dto/create-form.dto';
+import { Form } from '../schema';
 
-export class IForm extends CreateFormDto {
-  submissions: number;
-  createdAt: Date;
-  updatedAt: Date;
+export class IForm extends Form {
+  _id: string;
 }
