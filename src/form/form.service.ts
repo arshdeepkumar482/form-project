@@ -7,6 +7,7 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { Form } from './schema';
 import { User } from '../user/user.schema';
+import pick from 'lodash/pick';
 
 @Injectable()
 export class FormService {
@@ -29,24 +30,21 @@ export class FormService {
       });
     }
 
-    const { name, enabled } = createFormDto;
-    let finalFormPayload: Partial<Form> = {
-      userId_formName: userId + '_' + name,
-      name,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      user: userId as Types.ObjectId,
-      enabled,
-    };
-
-    if (user.plan.name !== PlanEnum.FREE) {
-      finalFormPayload = {
-        ...createFormDto,
-        ...finalFormPayload,
-      };
+    let allowedKeys: Array<keyof CreateFormDto> = ['name', 'enabled'];
+    switch (user.plan.name) {
+      case PlanEnum.FREE:
+        allowedKeys = [...allowedKeys];
+        break;
+      default:
+        break;
     }
+    const finalFormPayload: Partial<Form> = pick(createFormDto, ...allowedKeys);
 
-    const newForm = await new this.formModel(finalFormPayload);
+    const newForm = await new this.formModel({
+      ...finalFormPayload,
+      userId_formName: user._id + '_' + finalFormPayload.name,
+      user: user._id,
+    });
     const form = await newForm.save();
     await this.userService.incrementFormCount(userId, finalFormPayload.enabled);
     return form;
