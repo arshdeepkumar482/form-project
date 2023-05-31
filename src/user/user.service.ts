@@ -6,6 +6,7 @@ import { User } from './user.schema';
 import { SignupStrategyEnum } from './constants';
 import { PlanEnum } from '../plan/plans.constant';
 import { IUser } from './user';
+import { Form } from '../form/schema';
 
 @Injectable()
 export class UserService {
@@ -52,8 +53,9 @@ export class UserService {
     return this.userModel.findOne({ email });
   }
 
-  incrementFormCount(id: string, active = true, count = 1) {
-    const obj = active
+  formAddedOrRemoved(id: string, form: Form, { deleted = false } = {}) {
+    const count = deleted ? -1 : 1;
+    const obj = form.enabled
       ? { 'stats.forms.active': count }
       : { 'stats.forms.inactive': count };
 
@@ -62,13 +64,16 @@ export class UserService {
     });
   }
 
-  // update(id: string, form: Partial<User>) {
-  //   return this.userModel.findByIdAndUpdate(id, {
-  //     $inc: { 'stats.forms.total': 1 },
-  //   });
-  // }
-  //
-  //   remove(id: number) {
-  //     return `This action removes a #${id} user`;
-  //   }
+  formEnabledDisabled(id: string, oldForm: Form, updateForm: Form) {
+    if (oldForm.enabled === updateForm.enabled) return;
+    const inactiveCount = oldForm.enabled && !updateForm.enabled ? 1 : -1;
+    const activeCount = updateForm.enabled && !oldForm.enabled ? 1 : -1;
+
+    return this.userModel.findByIdAndUpdate(id, {
+      $inc: {
+        'stats.forms.active': activeCount,
+        'stats.forms.inactive': inactiveCount,
+      },
+    });
+  }
 }
