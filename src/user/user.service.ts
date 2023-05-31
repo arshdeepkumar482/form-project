@@ -6,7 +6,6 @@ import { User } from './user.schema';
 import { SignupStrategyEnum } from './constants';
 import { PlanEnum } from '../plan/plans.constant';
 import { IUser } from './user';
-import { Document } from 'mongoose';
 
 @Injectable()
 export class UserService {
@@ -21,7 +20,7 @@ export class UserService {
           api_and_webhook_access: false,
           app_integrations: false,
           custom_redirect: false,
-          forms: 1,
+          forms: 5,
           file_attachments: false,
           cross_domain_security: false,
           submissions: 100,
@@ -36,6 +35,7 @@ export class UserService {
       ...createUserDto,
       ...defaultAttributes,
     });
+
     await newUser.save();
     return 'This action adds a new user';
   }
@@ -52,10 +52,21 @@ export class UserService {
     return this.userModel.findOne({ email });
   }
 
-  //
-  //   update(id: number, updateUserDto: UpdateUserDto) {
-  //     return `This action updates a #${id} user`;
-  //   }
+  incrementFormCount(id: string, active = true, count = 1) {
+    const obj = active
+      ? { 'stats.forms.active': count }
+      : { 'stats.forms.inactive': count };
+
+    return this.userModel.findByIdAndUpdate(id, {
+      $inc: { 'stats.forms.total': count, ...obj },
+    });
+  }
+
+  // update(id: string, form: Partial<User>) {
+  //   return this.userModel.findByIdAndUpdate(id, {
+  //     $inc: { 'stats.forms.total': 1 },
+  //   });
+  // }
   //
   //   remove(id: number) {
   //     return `This action removes a #${id} user`;

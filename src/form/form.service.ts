@@ -3,8 +3,8 @@ import { CreateFormDto } from './dto/create-form.dto';
 import { UpdateFormDto } from './dto/update-form.dto';
 import { UserService } from '../user/user.service';
 import { PlanEnum } from '../plan/plans.constant';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { Form } from './schema';
 import { User } from '../user/user.schema';
 
@@ -13,10 +13,11 @@ export class FormService {
   constructor(
     private userService: UserService,
     @InjectModel(Form.name) private formModel: Model<Form>,
+    @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
-  doesPlanAllowToCreateForm(user: User): boolean {
-    return user.plan.limits.forms === user.stats.forms.total;
+  private doesPlanAllowToCreateForm(user: User): boolean {
+    return user.plan.limits.forms > user.stats.forms.total;
   }
 
   async create(createFormDto: CreateFormDto, userId: string) {
@@ -28,13 +29,14 @@ export class FormService {
       });
     }
 
-    const { name } = createFormDto;
+    const { name, enabled } = createFormDto;
     let finalFormPayload: Partial<Form> = {
       userId_formName: userId + '_' + name,
       name,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       user: userId as Types.ObjectId,
+      enabled,
     };
 
     if (user.plan.name !== PlanEnum.FREE) {
@@ -45,7 +47,9 @@ export class FormService {
     }
 
     const newForm = await new this.formModel(finalFormPayload);
-    return newForm.save();
+    const form = await newForm.save();
+    await this.userService.incrementFormCount(userId, finalFormPayload.enabled);
+    return form;
   }
 
   findAll() {

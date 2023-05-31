@@ -36,7 +36,7 @@ export class AuthGuard implements CanActivate {
         IS_COMPLETE_USER_DATA_REQUIRED,
         [context.getHandler(), context.getClass()],
       );
-    console.log('isCompleteUserDataRequired', isCompleteUserDataRequired);
+
     if (isPublic) {
       // 💡 See this condition
       return true;
