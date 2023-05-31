@@ -6,7 +6,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import { response } from 'express';
 import { MongodbExceptionCodes } from './mongodb-exception-codes';
 
 @Catch()

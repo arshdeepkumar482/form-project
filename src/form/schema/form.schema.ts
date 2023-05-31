@@ -9,7 +9,7 @@ export class Form {
     ref: User.name,
     required: true,
   })
-  user: mongoose.Types.ObjectId;
+  user: string;
 
   @Prop({ required: true })
   name: string;
