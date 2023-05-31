@@ -9,21 +9,21 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import mongoose from 'mongoose';
 
 export class CreateFormDto {
-  @Type(() => mongoose.Types.ObjectId)
-  @IsNotEmpty()
-  userId: mongoose.Types.ObjectId;
-
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
   name: string;
 
+  @IsBoolean()
+  @IsOptional()
+  enabled = true;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => IsUrl)
+  @IsOptional()
   domains: Array<string> = [];
 
   @IsUrl()
@@ -31,8 +31,6 @@ export class CreateFormDto {
   redirectUrl: string;
 
   @IsBoolean()
-  enabled = true;
-
-  @IsBoolean()
+  @IsOptional()
   programmatic_access = false;
 }

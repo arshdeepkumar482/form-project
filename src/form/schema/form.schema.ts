@@ -4,28 +4,39 @@ import { User } from '../../user/user.schema';
 
 @Schema({ autoIndex: true, timestamps: true })
 export class Form {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User.name,
+    required: true,
+  })
   user: mongoose.Types.ObjectId;
 
   @Prop({ required: true })
   name: string;
 
-  @Prop()
-  domains: Array<string> = [];
+  @Prop({ required: true, unique: true })
+  userId_formName: string;
+
+  @Prop({ default: [] })
+  domains: Array<string>;
 
   @Prop()
   redirectUrl: string;
 
-  @Prop()
-  enabled = true;
+  @Prop({ default: true })
+  enabled: boolean;
 
-  @Prop()
-  programmatic_access = false;
+  @Prop({ default: false })
+  programmatic_access: boolean;
+
+  @Prop({ default: 0 })
+  submission: number;
 }
 
 const _FormSchema = SchemaFactory.createForClass(Form);
 
 _FormSchema.pre('save', function (next) {
+  // to remove duplicate domains from list
   const set = {};
   this.domains.forEach((domain: string) => {
     set[domain] = 1;

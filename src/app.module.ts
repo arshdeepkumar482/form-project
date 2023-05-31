@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import { StudentModule } from './student/student.module';
-import { FormModule } from './form/form.module';
 import { AuthModule } from './auth/auth.module';
-import { PlanModule } from './plan/plan.module';
 import { UserModule } from './user/user.module';
+import { FormModule } from './form/form.module';
 
 @Module({
   imports: [
@@ -14,11 +12,12 @@ import { UserModule } from './user/user.module';
       dbName: 'db',
       autoIndex: true,
     }),
+    UserModule,
     // StudentModule,
-    // FormModule,
+    FormModule,
     // AuthModule,
     // PlanModule,
-    UserModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

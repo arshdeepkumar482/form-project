@@ -1,26 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
+import { IJwtTokenPayload } from './auth.interface';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async signIn({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }): Promise<any> {
+    const user = await this.userService.findByEmail(email);
+    if (user?.password !== password) {
+      throw new UnauthorizedException();
+    }
+    const { password: p, ...result } = user.toJSON();
+    const jwtPayload: IJwtTokenPayload = {
+      email: result.email,
+      _id: result._id.toString(),
+    };
+    // TODO: Generate a JWT and return it here
+    // instead of the user object
+    return {
+      ...result,
+      access_token: await this.jwtService.signAsync(jwtPayload),
+    };
   }
 }
